@@ -1,0 +1,71 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512">
+  <defs>
+    <!-- Sun gradient: pink top → yellow-orange bottom -->
+    <linearGradient id="sun" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#ff5dc8"/>
+      <stop offset="100%" stop-color="#fff066"/>
+    </linearGradient>
+    <!-- Sky gradient: dark top → deep purple at horizon -->
+    <linearGradient id="sky" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#0b0a14"/>
+      <stop offset="70%" stop-color="#1a0e2e"/>
+      <stop offset="100%" stop-color="#2d1450"/>
+    </linearGradient>
+    <!-- Grid fade -->
+    <linearGradient id="gridFade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#5df0ff" stop-opacity="0.9"/>
+      <stop offset="100%" stop-color="#5df0ff" stop-opacity="0.15"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Rounded background -->
+  <rect width="512" height="512" rx="80" fill="url(#sky)"/>
+
+  <!-- Sun circle with horizontal slice-out bands -->
+  <clipPath id="sunClip">
+    <circle cx="256" cy="260" r="100"/>
+  </clipPath>
+  <g clip-path="url(#sunClip)">
+    <circle cx="256" cy="260" r="100" fill="url(#sun)"/>
+    <!-- Horizontal gap bands (dark, increasingly thick toward bottom) -->
+    <rect x="0" y="230" width="512" height="3" fill="#0b0a14"/>
+    <rect x="0" y="245" width="512" height="4" fill="#0b0a14"/>
+    <rect x="0" y="260" width="512" height="5" fill="#0b0a14"/>
+    <rect x="0" y="278" width="512" height="7" fill="#0b0a14"/>
+    <rect x="0" y="298" width="512" height="9" fill="#0b0a14"/>
+    <rect x="0" y="320" width="512" height="12" fill="#0b0a14"/>
+    <rect x="0" y="345" width="512" height="16" fill="#0b0a14"/>
+  </g>
+
+  <!-- Sun glow -->
+  <circle cx="256" cy="260" r="100" fill="none" stroke="#ff5dc8" stroke-width="2" opacity="0.5"/>
+
+  <!-- Horizon line -->
+  <line x1="40" y1="310" x2="472" y2="310" stroke="#ff5dc8" stroke-width="2" opacity="0.7"/>
+
+  <!-- Perspective grid — horizontal lines (receding) -->
+  <g stroke="url(#gridFade)" stroke-width="1.2" opacity="0.8">
+    <line x1="40" y1="330" x2="472" y2="330"/>
+    <line x1="40" y1="355" x2="472" y2="355"/>
+    <line x1="40" y1="385" x2="472" y2="385"/>
+    <line x1="40" y1="420" x2="472" y2="420"/>
+    <line x1="40" y1="462" x2="472" y2="462"/>
+  </g>
+
+  <!-- Perspective grid — vertical lines (converging to vanishing point) -->
+  <g stroke="url(#gridFade)" stroke-width="1.2" opacity="0.6">
+    <line x1="256" y1="310" x2="256" y2="472"/>
+    <line x1="256" y1="310" x2="160" y2="472"/>
+    <line x1="256" y1="310" x2="352" y2="472"/>
+    <line x1="256" y1="310" x2="60"  y2="472"/>
+    <line x1="256" y1="310" x2="452" y2="472"/>
+    <line x1="256" y1="310" x2="40"  y2="440"/>
+    <line x1="256" y1="310" x2="472" y2="440"/>
+  </g>
+
+  <!-- Audio waveform accent above sun -->
+  <g stroke="#5df0ff" stroke-width="2.5" stroke-linecap="round" fill="none" opacity="0.85">
+    <polyline points="130,145 150,130 170,148 190,120 210,142 230,110 250,135 270,105 290,138 310,115 330,140 350,125 370,145 390,132"/>
+  </g>
+
+</svg>

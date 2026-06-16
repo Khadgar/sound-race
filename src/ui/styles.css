@@ -1,0 +1,108 @@
+:root {
+  --bg: #0b0a14;
+  --fg: #f4e9d8;
+  --accent: #ff5dc8;
+  --accent2: #5df0ff;
+  --muted: #6a6480;
+  font-family: ui-monospace, "JetBrains Mono", Menlo, Consolas, monospace;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  margin: 0;
+  height: 100%;
+  background: var(--bg);
+  color: var(--fg);
+  overflow: hidden;
+}
+
+#app {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  place-items: center;
+}
+
+canvas {
+  display: block;
+  image-rendering: pixelated;
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 2rem;
+  pointer-events: none;
+  z-index: 10;
+}
+
+.panel {
+  pointer-events: auto;
+  background: rgba(11, 10, 20, 0.85);
+  border: 1px solid var(--accent);
+  border-radius: 8px;
+  padding: 1.5rem 2rem;
+  max-width: 460px;
+  width: 100%;
+  box-shadow: 0 0 24px rgba(255, 93, 200, 0.25);
+}
+
+.panel h1 {
+  margin: 0 0 0.25rem;
+  letter-spacing: 0.12em;
+  color: var(--accent);
+  text-shadow: 0 0 12px rgba(255, 93, 200, 0.6);
+}
+
+.panel p {
+  margin: 0.25rem 0 1rem;
+  color: var(--muted);
+  font-size: 0.85rem;
+}
+
+.row {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.5rem;
+}
+
+button,
+input[type="text"],
+input[type="file"]::file-selector-button {
+  font-family: inherit;
+  font-size: 0.85rem;
+  background: transparent;
+  color: var(--fg);
+  border: 1px solid var(--muted);
+  border-radius: 4px;
+  padding: 0.5rem 0.75rem;
+  cursor: pointer;
+}
+
+button:hover,
+input[type="file"]::file-selector-button:hover {
+  border-color: var(--accent2);
+  color: var(--accent2);
+}
+
+input[type="text"] {
+  flex: 1;
+  cursor: text;
+}
+
+.status {
+  font-size: 0.8rem;
+  color: var(--accent2);
+  min-height: 1.2em;
+  margin-top: 0.5rem;
+}
+
+.hidden {
+  display: none !important;
+}

@@ -6,9 +6,9 @@
  * filename below. Display name is derived from the filename.
  */
 
-/** Base URL for fetching featured tracks. In browser this is same-origin
- *  (served from public/). Override for Capacitor builds to point at a CDN. */
-export const TRACKS_BASE_URL = "/";
+/** Base URL for fetching featured tracks. Uses Vite's base so paths
+ *  work on both root deploys and subpath deploys (e.g. GitHub Pages). */
+export const TRACKS_BASE_URL = import.meta.env.BASE_URL;
 
 /** Cache name used by the Cache API to store downloaded tracks. */
 export const TRACKS_CACHE_NAME = "sound-race-tracks";

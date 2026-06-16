@@ -27,6 +27,8 @@ jobs:
 
       - run: npm ci
       - run: npm run build
+        env:
+          BASE_PATH: /sound-race/
 
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -80,13 +80,14 @@ export class HUD {
     });
     this.speedText.textContent = "▌ SPD 000  │ ··········";
 
-    // ---- Top-right: combo + health ----
+    // ---- Top-center: combo multiplier ----
     this.comboText = panel({
-      top: "14px", right: "14px",
+      top: "14px", left: "50%",
+      transform: "translateX(-50%)",
       fontSize: "32px",
       color: hex(COLOR_PINK),
       letterSpacing: "4px",
-      textAlign: "right",
+      textAlign: "center",
       textShadow: `0 0 12px ${rgba(COLOR_PINK, 0.55)}`,
     });
     this.comboText.textContent = "";
@@ -235,7 +236,13 @@ export class HUD {
   }
 
   setCombo(combo: number): void {
-    this.comboText.textContent = combo > 1 ? `x${combo}` : "";
+    if (combo > 1) {
+      this.comboText.textContent = `x${combo}`;
+      this.comboText.style.display = "";
+    } else {
+      this.comboText.textContent = "";
+      this.comboText.style.display = "none";
+    }
   }
 
   setHealth(health01: number): void {

@@ -6,9 +6,11 @@
  * filename below. Display name is derived from the filename.
  */
 
-/** Base URL for fetching featured tracks. Uses Vite's base so paths
- *  work on both root deploys and subpath deploys (e.g. GitHub Pages). */
-export const TRACKS_BASE_URL = import.meta.env.BASE_URL;
+/** Base URL for fetching featured tracks. When VITE_TRACKS_BASE_URL is
+ *  set (e.g. via .env.android) tracks are fetched from that CDN/host;
+ *  otherwise falls back to Vite's BASE_URL (public/ folder). */
+export const TRACKS_BASE_URL: string =
+  import.meta.env.VITE_TRACKS_BASE_URL || import.meta.env.BASE_URL;
 
 /** Cache name used by the Cache API to store downloaded tracks. */
 export const TRACKS_CACHE_NAME = "sound-race-tracks";
@@ -17,6 +19,9 @@ const FILENAMES: ReadonlyArray<string> = [
   "sandstorm.mp3",
   "synthwave.mp3",
   "midnight-synthwave.mp3",
+  "delosound-synthwave.mp3",
+  "usefulpix-retro-synthwave.mp3",
+  "alexgrohl-synthwave.mp3"
 ];
 
 export interface PreloadedTrack {

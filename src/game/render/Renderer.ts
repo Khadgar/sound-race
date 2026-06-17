@@ -12,6 +12,8 @@
 
 import * as THREE from "three";
 
+import type { QualityConfig } from "../quality.js";
+
 const BACKGROUND = 0x0b0a14;
 const FOG_COLOR = 0x14082a;
 const FOG_DENSITY = 0.035;
@@ -19,8 +21,8 @@ const FOG_DENSITY = 0.035;
 export interface RendererOptions {
   /** DOM element to mount the canvas into. */
   host: HTMLElement;
-  /** Optional: cap devicePixelRatio (default 2). */
-  pixelRatioCap?: number;
+  /** Quality configuration (controls antialias, shadows, pixelRatio). */
+  quality: QualityConfig;
   /** Optional: vertical field-of-view in degrees (default 65). */
   fov?: number;
 }
@@ -37,16 +39,21 @@ export class Renderer {
 
   constructor(opts: RendererOptions) {
     this.host = opts.host;
-    this.pixelRatioCap = opts.pixelRatioCap ?? 2;
+    const q = opts.quality;
+    this.pixelRatioCap = q.pixelRatioCap;
 
     this.renderer = new THREE.WebGLRenderer({
-      antialias: true,
+      antialias: q.antialias,
       powerPreference: "high-performance",
       alpha: false,
     });
     this.renderer.setPixelRatio(Math.min(window.devicePixelRatio, this.pixelRatioCap));
-    this.renderer.shadowMap.enabled = true;
-    this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+
+    if (q.shadows) {
+      this.renderer.shadowMap.enabled = true;
+      this.renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+    }
+
     this.renderer.outputColorSpace = THREE.SRGBColorSpace;
     this.renderer.toneMapping = THREE.ACESFilmicToneMapping;
     this.renderer.toneMappingExposure = 1.0;

@@ -11,7 +11,7 @@
     "format": "prettier --write \"src/**/*.{ts,tsx,css,html}\"",
     "test": "vitest run",
     "test:watch": "vitest",
-    "cap:sync": "npm run build && npx cap sync && node scripts/strip-mp3.mjs",
+    "cap:sync": "npm run build -- --mode android && npx cap sync && node scripts/strip-mp3.mjs",
     "cap:open": "npx cap open android",
     "cap:run": "npx cap run android"
   },

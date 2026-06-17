@@ -20,6 +20,8 @@
 
 import * as THREE from "three";
 
+import type { QualityConfig } from "../quality.js";
+
 const COLOR_BG_TOP = 0x14082a;
 const COLOR_BG_BOTTOM = 0x0b0a14;
 const COLOR_HORIZON = 0xff2d8e;
@@ -43,13 +45,13 @@ export class SceneEnv {
   private readonly horizonStripBack: THREE.Mesh;
   private readonly horizonStripMaterial: THREE.MeshBasicMaterial;
 
-  constructor(parent: THREE.Scene) {
+  constructor(parent: THREE.Scene, quality: QualityConfig) {
     this.root = new THREE.Group();
     this.root.name = "SceneEnv";
     parent.add(this.root);
 
     // ---- Sky dome ----
-    const skyTexture = buildSkyTexture();
+    const skyTexture = buildSkyTexture(quality.skyTextureWidth);
     const skyGeom = new THREE.SphereGeometry(SKY_RADIUS, 32, 16);
     const skyMaterial = new THREE.MeshBasicMaterial({
       map: skyTexture,
@@ -108,15 +110,19 @@ export class SceneEnv {
     this.directional = new THREE.DirectionalLight(0xff7adf, 0.9);
     this.directional.position.set(0, 30, -40);
     this.directional.target.position.set(0, 0, 0);
-    this.directional.castShadow = true;
-    this.directional.shadow.mapSize.set(1024, 1024);
-    this.directional.shadow.camera.near = 1;
-    this.directional.shadow.camera.far = 120;
-    this.directional.shadow.camera.left = -25;
-    this.directional.shadow.camera.right = 25;
-    this.directional.shadow.camera.top = 25;
-    this.directional.shadow.camera.bottom = -25;
-    this.directional.shadow.bias = -0.0008;
+
+    if (quality.shadows) {
+      this.directional.castShadow = true;
+      this.directional.shadow.mapSize.set(1024, 1024);
+      this.directional.shadow.camera.near = 1;
+      this.directional.shadow.camera.far = 120;
+      this.directional.shadow.camera.left = -25;
+      this.directional.shadow.camera.right = 25;
+      this.directional.shadow.camera.top = 25;
+      this.directional.shadow.camera.bottom = -25;
+      this.directional.shadow.bias = -0.0008;
+    }
+
     this.root.add(this.directional);
     this.root.add(this.directional.target);
   }
@@ -153,9 +159,9 @@ export class SceneEnv {
 // ----------------------------------------------------------------------
 // Procedural textures
 
-function buildSkyTexture(): THREE.Texture {
-  const W = 1024;
-  const H = 512;
+function buildSkyTexture(width: number = 1024): THREE.Texture {
+  const W = width;
+  const H = Math.floor(width / 2);
   const canvas = createCanvas(W, H);
   const ctx = canvas.getContext("2d");
   if (!ctx) {

@@ -20,6 +20,7 @@ import * as THREE from "three";
 
 import type { GameEvent, TrackData } from "../../audio/types.js";
 import { BLOCK_PALETTE, OBSTACLE_COLOR, OBSTACLE_OUTLINE, blockColorHex } from "../palette.js";
+import type { QualityConfig } from "../quality.js";
 import { sampleSeries } from "../track.js";
 import { TRACK3D_CONSTANTS } from "./Track3D.js";
 
@@ -87,14 +88,16 @@ export class Entities3D {
   private nextEventIdx = 0;
 
   private readonly sharedGeoms: SharedGeoms;
+  private readonly quality: QualityConfig;
 
-  constructor(parent: THREE.Object3D, track: TrackData, centerline: Float32Array) {
+  constructor(parent: THREE.Object3D, track: TrackData, centerline: Float32Array, quality: QualityConfig) {
     this.root = new THREE.Group();
     this.root.name = "Entities3D";
     parent.add(this.root);
 
     this.track = track;
     this.centerline = centerline;
+    this.quality = quality;
     this.sharedGeoms = buildSharedGeoms();
   }
 
@@ -224,15 +227,17 @@ export class Entities3D {
   private buildPickupMesh(colorIdx: number): THREE.Object3D {
     const group = new THREE.Group();
     const color = blockColorHex(colorIdx);
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color,
-      emissive: color,
-      emissiveIntensity: 0.7,
-      roughness: 0.45,
-      metalness: 0.25,
-    });
+    const bodyMat = this.quality.pbrEntities
+      ? new THREE.MeshStandardMaterial({
+          color,
+          emissive: color,
+          emissiveIntensity: 0.7,
+          roughness: 0.45,
+          metalness: 0.25,
+        })
+      : new THREE.MeshBasicMaterial({ color });
     const body = new THREE.Mesh(this.sharedGeoms.pickupBody, bodyMat);
-    body.castShadow = true;
+    if (this.quality.entityShadows) body.castShadow = true;
     group.add(body);
 
     const edgeMat = new THREE.LineBasicMaterial({
@@ -247,15 +252,17 @@ export class Entities3D {
 
   private buildHazardMesh(): THREE.Object3D {
     const group = new THREE.Group();
-    const bodyMat = new THREE.MeshStandardMaterial({
-      color: OBSTACLE_COLOR,
-      emissive: OBSTACLE_OUTLINE,
-      emissiveIntensity: 0.25,
-      roughness: 0.7,
-      metalness: 0.1,
-    });
+    const bodyMat = this.quality.pbrEntities
+      ? new THREE.MeshStandardMaterial({
+          color: OBSTACLE_COLOR,
+          emissive: OBSTACLE_OUTLINE,
+          emissiveIntensity: 0.25,
+          roughness: 0.7,
+          metalness: 0.1,
+        })
+      : new THREE.MeshBasicMaterial({ color: OBSTACLE_COLOR });
     const body = new THREE.Mesh(this.sharedGeoms.hazardBody, bodyMat);
-    body.castShadow = true;
+    if (this.quality.entityShadows) body.castShadow = true;
     group.add(body);
 
     const edgeMat = new THREE.LineBasicMaterial({

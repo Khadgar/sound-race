@@ -3,6 +3,7 @@ import { generateBeatmap } from "./audio/beatmap.js";
 import { AudioPlayer } from "./audio/player.js";
 import { ensureTracksAvailable } from "./audio/trackCache.js";
 import { GameEngine } from "./game/engine.js";
+import { detectQuality } from "./game/quality.js";
 import { Renderer } from "./game/render/Renderer.js";
 import { SceneEnv } from "./game/render/SceneEnv.js";
 import { GameScene } from "./game/scene.js";
@@ -14,11 +15,13 @@ async function bootstrap(): Promise<void> {
   const appEl = document.getElementById("app");
   if (!appEl) throw new Error("#app element missing");
 
+  const quality = detectQuality();
+
   // Three.js renderer owns the canvas + Scene + chase PerspectiveCamera
   // for the lifetime of the page. Each race installs its own subgraph
   // into renderer.scene and tears it down on destroy.
-  const renderer = new Renderer({ host: appEl });
-  const sceneEnv = new SceneEnv(renderer.scene);
+  const renderer = new Renderer({ host: appEl, quality });
+  const sceneEnv = new SceneEnv(renderer.scene, quality);
 
   const menu = new MenuOverlay(appEl);
 
@@ -113,7 +116,7 @@ async function bootstrap(): Promise<void> {
             onQuitToMenu: () => quitToMenu(),
           });
         },
-      });
+      }, quality);
       activeScene = scene;
 
       menu.hide();

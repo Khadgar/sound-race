@@ -22,12 +22,14 @@
 
 import * as THREE from "three";
 
+import type { QualityConfig } from "../quality.js";
+
 const COLOR_NEON_PINK = 0xff5dc8;
 const COLOR_NEON_CYAN = 0x5df0ff;
 const COLOR_NEON_YELLOW = 0xfff066;
 const COLOR_HORIZON = 0xff2d8e;
 
-const STREAK_COUNT = 56;
+const STREAK_COUNT_DEFAULT = 56;
 const STREAK_LEN = 1.2;
 const STREAK_NEAR_Z = 6;
 const STREAK_FAR_Z = -40;
@@ -53,12 +55,12 @@ export class Fx {
   private readonly streaks: SpeedStreaks;
   private readonly overlays: DOMOverlays;
 
-  constructor(parent: THREE.Object3D, host: HTMLElement) {
+  constructor(parent: THREE.Object3D, host: HTMLElement, quality: QualityConfig) {
     this.root = new THREE.Group();
     this.root.name = "Fx";
     parent.add(this.root);
 
-    this.streaks = new SpeedStreaks(this.root);
+    this.streaks = new SpeedStreaks(this.root, quality.streakCount);
     this.overlays = new DOMOverlays(host);
   }
 
@@ -83,11 +85,13 @@ class SpeedStreaks {
   private readonly segs: THREE.LineSegments;
   private readonly positions: Float32Array;
   private readonly base: Float32Array; // x, baseY, baseR(angle), pairIdx → for respawn
+  private readonly count: number;
 
-  constructor(parent: THREE.Object3D) {
-    this.positions = new Float32Array(STREAK_COUNT * 2 * 3);
-    this.base = new Float32Array(STREAK_COUNT * 4);
-    for (let i = 0; i < STREAK_COUNT; i++) {
+  constructor(parent: THREE.Object3D, streakCount: number = STREAK_COUNT_DEFAULT) {
+    this.count = streakCount;
+    this.positions = new Float32Array(this.count * 2 * 3);
+    this.base = new Float32Array(this.count * 4);
+    for (let i = 0; i < this.count; i++) {
       this.respawn(i, true);
     }
 
@@ -110,7 +114,7 @@ class SpeedStreaks {
     const vel = STREAK_BASE_VEL * (0.4 + speedAmt * 1.4);
     const dz = vel * dtSec;
     const p = this.positions;
-    for (let i = 0; i < STREAK_COUNT; i++) {
+    for (let i = 0; i < this.count; i++) {
       const o = i * 6;
       let z0 = p[o + 2]! + dz;
       let z1 = p[o + 5]! + dz;

@@ -20,6 +20,7 @@ import * as THREE from "three";
 import type { AudioPlayer } from "../audio/player.js";
 import type { TrackData } from "../audio/types.js";
 import { LaneInput } from "./input.js";
+import type { QualityConfig } from "./quality.js";
 import { Entities3D, type CollisionOutcome } from "./render/Entities3D.js";
 import { Fx } from "./render/Fx.js";
 import { Hull } from "./render/Hull.js";
@@ -71,6 +72,7 @@ export class GameScene {
   private readonly centerline: Float32Array;
   private readonly score: ScoreState = createScoreState();
   private readonly input: LaneInput;
+  private readonly quality: QualityConfig;
   private readonly track3D: Track3D;
   private readonly hull: Hull;
   private readonly entities: Entities3D;
@@ -118,7 +120,9 @@ export class GameScene {
     private readonly track: TrackData,
     private readonly player: AudioPlayer,
     private readonly cb: GameSceneCallbacks,
+    quality: QualityConfig,
   ) {
+    this.quality = quality;
     this.root = new THREE.Group();
     this.renderer.scene.add(this.root);
 
@@ -131,8 +135,8 @@ export class GameScene {
     this.halfRoadWorld = (track.laneCount * TRACK3D_CONSTANTS.LANE_WORLD_WIDTH) / 2;
     this.track3D = new Track3D(this.root, track, this.centerline);
     this.hull = new Hull(this.root);
-    this.entities = new Entities3D(this.root, track, this.centerline);
-    this.fx = new Fx(this.root, this.renderer.host);
+    this.entities = new Entities3D(this.root, track, this.centerline, quality);
+    this.fx = new Fx(this.root, this.renderer.host, quality);
     this.hud = new HUD(this.renderer.host);
     this.touchControls = new TouchControls({
       onPause: () => { if (this.onPauseCb) this.onPauseCb(); },
@@ -240,7 +244,7 @@ export class GameScene {
     // Visible activation burst — a cyan ring radiating off the hull.
     this.spawnBurstAtHull({
       color: 0x5df0ff,
-      count: 36,
+      count: this.quality.burstCountPrimary,
       lifetime: 0.55,
       speed: 6,
       size: 0.18,
@@ -330,6 +334,7 @@ export class GameScene {
   }
 
   private applyCollisionOutcomes(outs: CollisionOutcome[]): void {
+    const q = this.quality;
     for (const o of outs) {
       if (o.kind === "hit") {
         if (o.type === "pickup") {
@@ -339,10 +344,10 @@ export class GameScene {
           this.flashColor = blockColor;
           this.flashStrength = 0.6;
           this.flashDecayRate = 3; // mellow, lingering glow
-          // Primary cube-colored burst — bigger than the old default.
+          // Primary cube-colored burst.
           this.spawnBurstAtHull({
             color: blockColor,
-            count: 36,
+            count: q.burstCountPrimary,
             lifetime: 0.5,
             speed: 6,
             size: 0.2,
@@ -350,36 +355,40 @@ export class GameScene {
           // Secondary white sparkle puff so the explosion has layers.
           this.spawnBurstAtHull({
             color: 0xfffce0,
-            count: 14,
+            count: q.burstCountSecondary,
             lifetime: 0.6,
             speed: 3.2,
             size: 0.1,
             alphaScale: 0.9,
           });
-          // Expanding shockwave ring (low-poly wireframe sphere).
-          this.spawnShockwaveAtHull({
-            color: blockColor,
-            lifetime: 0.45,
-            maxRadius: 2.6,
-          });
-          // Brief point light to actually flash the road around the hull.
-          this.spawnTempLightAtHull(blockColor, 4, 6, 0.18);
+          if (q.shockwaves) {
+            this.spawnShockwaveAtHull({
+              color: blockColor,
+              lifetime: 0.45,
+              maxRadius: 2.6,
+            });
+          }
+          if (q.tempLights) {
+            this.spawnTempLightAtHull(blockColor, 4, 6, 0.18);
+          }
           if (result.cluster) {
             this.clusterPulse = 1;
             this.clusterPulseLen = result.clusterLen;
             this.spawnBurstAtHull({
               color: 0xfff066,
-              count: 36,
+              count: q.burstCountPrimary,
               lifetime: 0.65,
               speed: 7,
               size: 0.22,
               alphaScale: 1.1,
             });
-            this.spawnShockwaveAtHull({
-              color: 0xfff066,
-              lifetime: 0.6,
-              maxRadius: 3.4,
-            });
+            if (q.shockwaves) {
+              this.spawnShockwaveAtHull({
+                color: 0xfff066,
+                lifetime: 0.6,
+                maxRadius: 3.4,
+              });
+            }
           }
         } else {
           if (this.isShieldActive(this.lastSongTime)) {
@@ -390,7 +399,7 @@ export class GameScene {
             this.flashDecayRate = 3;
             this.spawnBurstAtHull({
               color: 0x5df0ff,
-              count: 28,
+              count: q.burstCountPrimary > 20 ? 28 : 14,
               lifetime: 0.45,
               speed: 7,
               size: 0.16,
@@ -402,10 +411,9 @@ export class GameScene {
             this.flashColor = 0xffffff;
             this.flashStrength = 1.5;
             this.flashDecayRate = 10; // sharp pop, gone in ~0.15s
-            // Smaller, sharper red impact so the FLASH dominates, not particles.
             this.spawnBurstAtHull({
               color: 0xff4030,
-              count: 22,
+              count: q.burstCountPrimary > 20 ? 22 : 12,
               lifetime: 0.4,
               speed: 5.5,
               size: 0.18,

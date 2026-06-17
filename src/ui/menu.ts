@@ -3,6 +3,13 @@
  */
 
 import { PRELOADED_TRACKS } from "../audio/preloadedTracks.js";
+import {
+  QUALITY_TIERS,
+  type QualityTier,
+  loadQualityPreference,
+  saveQualityPreference,
+  detectQuality,
+} from "../game/quality.js";
 import { STARTING_SHIELDS, type ScoreSummary } from "../game/score.js";
 import type { HighscoreEntry } from "../storage/highscores.js";
 
@@ -127,8 +134,6 @@ export class MenuOverlay {
    *  it after a race ends or the user quits from the pause overlay. */
   renderTitle(): void {
     this.panel.innerHTML = "";
-    this.panel.style.maxHeight = "";
-    this.panel.style.overflowY = "";
     const h1 = document.createElement("h1");
     h1.textContent = "SOUND RACE";
     const p = document.createElement("p");
@@ -169,6 +174,7 @@ export class MenuOverlay {
     this.panel.appendChild(this.renderFeaturedTracks());
 
     this.panel.appendChild(this.renderDifficultyRow());
+    this.panel.appendChild(this.renderQualityRow());
 
     const hint = document.createElement("p");
     hint.style.marginTop = "1rem";
@@ -241,6 +247,59 @@ export class MenuOverlay {
       saveDifficulty(v);
     });
 
+    return row;
+  }
+
+  /** Renders the GRAPHICS quality selector — label + toggle buttons. */
+  private renderQualityRow(): HTMLDivElement {
+    const currentTier = detectQuality().tier;
+
+    const row = document.createElement("div");
+    row.className = "row";
+    row.style.alignItems = "center";
+    row.style.gap = "0.6rem";
+    row.style.marginTop = "0.4rem";
+
+    const label = document.createElement("span");
+    label.textContent = "Graphics";
+    label.style.color = "var(--muted)";
+    label.style.fontSize = "0.85rem";
+    label.style.minWidth = "5.5rem";
+    row.appendChild(label);
+
+    const btnGroup = document.createElement("div");
+    btnGroup.style.display = "flex";
+    btnGroup.style.gap = "0.3rem";
+    btnGroup.style.flex = "1";
+
+    const buttons: HTMLButtonElement[] = [];
+
+    for (const tier of QUALITY_TIERS) {
+      const btn = document.createElement("button");
+      btn.textContent = tier.toUpperCase();
+      btn.style.flex = "1";
+      btn.style.padding = "0.35rem 0.25rem";
+      btn.style.fontSize = "0.7rem";
+      btn.style.letterSpacing = "0.06em";
+      btn.style.cursor = "pointer";
+
+      if (tier === currentTier) {
+        btn.style.borderColor = "var(--accent2)";
+        btn.style.color = "var(--accent2)";
+        btn.style.background = "rgba(93, 240, 255, 0.1)";
+      }
+
+      btn.addEventListener("click", () => {
+        if (tier === currentTier) return;
+        saveQualityPreference(tier);
+        window.location.reload();
+      });
+
+      buttons.push(btn);
+      btnGroup.appendChild(btn);
+    }
+
+    row.appendChild(btnGroup);
     return row;
   }
 
@@ -406,8 +465,6 @@ export class MenuOverlay {
   ): void {
     this.show();
     this.panel.innerHTML = "";
-    this.panel.style.maxHeight = "calc(100vh - 4rem)";
-    this.panel.style.overflowY = "auto";
 
     this.panel.appendChild(this.renderResultsHeader(summary, highscores, justFinishedAt));
 
@@ -491,8 +548,6 @@ export class MenuOverlay {
   ): void {
     this.show();
     this.panel.innerHTML = "";
-    this.panel.style.maxHeight = "calc(100vh - 4rem)";
-    this.panel.style.overflowY = "auto";
 
     const header = document.createElement("div");
     header.style.textAlign = "center";
